@@ -13,7 +13,7 @@ app.use(express.json());
 
 //mongobd connect
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.cdszt.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -46,6 +46,16 @@ async function run() {
     app.get("/productCount", async (req, res) => {
       const count = await productCollection.countDocuments();
       res.send({ count });
+    });
+    // product by keys
+    app.post("/product/keys", async (req, res) => {
+      const keys = req.body;
+      const ids = keys.map((id) => ObjectId(id));
+      const query = { _id: { $in: ids } };
+      const cursor = productCollection.find(query);
+      const product = await cursor.toArray();
+      console.log(keys);
+      res.send(product);
     });
   } finally {
   }
